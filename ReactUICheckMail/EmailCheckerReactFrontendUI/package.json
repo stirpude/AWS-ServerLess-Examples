@@ -1,0 +1,23 @@
+{
+  "name": "dynamolambda",
+  "version": "0.1.0",
+  "proxy": "http://localhost:3000",
+  "main": "app1,js",
+  "private": true,
+  "dependencies": {
+    "axios": "^0.19.0",
+    "bootstrap": "^4.1.1",
+    "font-awesome": "^4.7.0",
+    "http-proxy-middleware": "^0.20.0",
+    "react": "^16.10.2",
+    "react-dom": "^16.10.2",
+    "react-scripts": "0.9.5"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject"
+  }
+}

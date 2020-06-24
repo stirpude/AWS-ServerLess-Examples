@@ -1,0 +1,3 @@
+/usr/share/nginx/html
+
+http://ec2-34-220-247-31.us-west-2.compute.amazonaws.com:3000/geturl
