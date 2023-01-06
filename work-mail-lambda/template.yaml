@@ -27,10 +27,7 @@ Resources:
           Properties:
             Path: /hello
             Method: get
-      # Environment:
-      #   Variables:
-      #     UPDATED_EMAIL_S3_BUCKET:
-      #       Ref: UpdatedEmailS3Bucket
+      
 
   PermissionToCallLambdaAbove:
     Type: AWS::Lambda::Permission
@@ -68,47 +65,6 @@ Resources:
         - "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
         - "arn:aws:iam::aws:policy/AmazonWorkMailMessageFlowFullAccess"
 
-  # UpdatedEmailS3Bucket:
-  #   Type: AWS::S3::Bucket
-  #   DeletionPolicy: Retain
-  #   Properties:
-  #     BucketEncryption:
-  #       ServerSideEncryptionConfiguration:
-  #         - ServerSideEncryptionByDefault:
-  #             SSEAlgorithm: AES256
-  #     PublicAccessBlockConfiguration:
-  #       BlockPublicAcls: true
-  #       BlockPublicPolicy: true
-  #       IgnorePublicAcls: true
-  #       RestrictPublicBuckets: true
-  #     VersioningConfiguration:
-  #       Status: Enabled
-  #     LifecycleConfiguration:
-  #       Rules:
-  #         - Status: Enabled
-  #           ExpirationInDays: 1 # Delete after 1 day
-  #         - Status: Enabled
-  #           NoncurrentVersionExpirationInDays: 1 # Delete non current versions after 1 day
-
-  #   UpdatedEmailS3BucketPolicy:
-  #   Type: AWS::S3::BucketPolicy
-  #   Properties:
-  #     Bucket:
-  #       Ref: UpdatedEmailS3Bucket
-  #     PolicyDocument:
-  #       Statement:
-  #         - Effect: Allow
-  #           Action:
-  #             - "s3:GetObject"
-  #             - "s3:GetObjectVersion"
-  #           Resource: !Sub "${UpdatedEmailS3Bucket.Arn}/*"
-  #           Condition:
-  #             Bool:
-  #               aws:SecureTransport: true
-  #             ArnLike:
-  #               aws:SourceArn: !Sub 'arn:aws:workmailmessageflow:${AWS::Region}:${AWS::AccountId}:message/*'
-  #           Principal:
-  #             Service: !Sub 'workmail.${AWS::Region}.amazonaws.com' # This policy enables WorkMail to read objects from your bucket
                                       
 Outputs:
   # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
