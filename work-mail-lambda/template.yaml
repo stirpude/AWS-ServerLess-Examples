@@ -1,0 +1,125 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  lambda-nodejs14.x
+
+  Sample SAM Template for lambda-nodejs14.x
+  
+# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
+Globals:
+  Function:
+    Timeout: 3
+    MemorySize: 128
+
+Resources:
+  WorkMailHelloWorldFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      CodeUri: hello-world/
+      Handler: app.workMailLambda
+      Runtime: nodejs14.x
+      Role: !GetAtt WorkMailHelloWorldFunctionRole.Arn
+      Architectures:
+        - x86_64
+      Events:
+        HelloWorld:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            Path: /hello
+            Method: get
+      # Environment:
+      #   Variables:
+      #     UPDATED_EMAIL_S3_BUCKET:
+      #       Ref: UpdatedEmailS3Bucket
+
+  PermissionToCallLambdaAbove:
+    Type: AWS::Lambda::Permission
+    DependsOn: WorkMailHelloWorldFunction
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !Ref WorkMailHelloWorldFunction
+      Principal: !Sub 'workmail.${AWS::Region}.amazonaws.com'
+      SourceArn: !Sub 'arn:aws:workmail:${AWS::Region}:${AWS::AccountId}:organization/*'  
+  
+  WorkMailHelloWorldFunctionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action:
+              - sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service:
+                - "lambda.amazonaws.com"
+        Version: "2012-10-17"
+      Path: "/"
+      Policies:
+        - PolicyName: "WorkMailMessageFlowAccess"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'workmailmessageflow:GetRawMessageContent'
+                Resource: !Sub 'arn:aws:workmailmessageflow:${AWS::Region}:${AWS::AccountId}:message/*'
+                
+      ManagedPolicyArns:
+        - "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+        - "arn:aws:iam::aws:policy/AmazonWorkMailMessageFlowFullAccess"
+
+  # UpdatedEmailS3Bucket:
+  #   Type: AWS::S3::Bucket
+  #   DeletionPolicy: Retain
+  #   Properties:
+  #     BucketEncryption:
+  #       ServerSideEncryptionConfiguration:
+  #         - ServerSideEncryptionByDefault:
+  #             SSEAlgorithm: AES256
+  #     PublicAccessBlockConfiguration:
+  #       BlockPublicAcls: true
+  #       BlockPublicPolicy: true
+  #       IgnorePublicAcls: true
+  #       RestrictPublicBuckets: true
+  #     VersioningConfiguration:
+  #       Status: Enabled
+  #     LifecycleConfiguration:
+  #       Rules:
+  #         - Status: Enabled
+  #           ExpirationInDays: 1 # Delete after 1 day
+  #         - Status: Enabled
+  #           NoncurrentVersionExpirationInDays: 1 # Delete non current versions after 1 day
+
+  #   UpdatedEmailS3BucketPolicy:
+  #   Type: AWS::S3::BucketPolicy
+  #   Properties:
+  #     Bucket:
+  #       Ref: UpdatedEmailS3Bucket
+  #     PolicyDocument:
+  #       Statement:
+  #         - Effect: Allow
+  #           Action:
+  #             - "s3:GetObject"
+  #             - "s3:GetObjectVersion"
+  #           Resource: !Sub "${UpdatedEmailS3Bucket.Arn}/*"
+  #           Condition:
+  #             Bool:
+  #               aws:SecureTransport: true
+  #             ArnLike:
+  #               aws:SourceArn: !Sub 'arn:aws:workmailmessageflow:${AWS::Region}:${AWS::AccountId}:message/*'
+  #           Principal:
+  #             Service: !Sub 'workmail.${AWS::Region}.amazonaws.com' # This policy enables WorkMail to read objects from your bucket
+                                      
+Outputs:
+  # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
+  # Find out more about other implicit resources you can reference within SAM
+  # https://github.com/awslabs/serverless-application-model/blob/master/docs/internals/generated_resources.rst#api
+  HelloWorldApi:
+    Description: "API Gateway endpoint URL for Prod stage for Hello World function"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/hello/"
+  # HelloWorldFunction:
+  #   Description: "Hello World Lambda Function ARN"
+  #   Value: !GetAtt HelloWorldFunction.Arn
+  # HelloWorldFunctionIamRole:
+  #   Description: "Implicit IAM Role created for Hello World function"
+  #   Value: !GetAtt HelloWorldFunctionRole.Arn
