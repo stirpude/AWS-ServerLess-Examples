@@ -1,0 +1,3 @@
+[submodule "AWS-ServerLess-Examples"]
+	path = AWS-ServerLess-Examples
+	url = https://github.com/stirpude/AWS-ServerLess-Examples
