@@ -61,7 +61,27 @@ Resources:
           KeyType: HASH         
       ProvisionedThroughput:
         ReadCapacityUnits: 2
-        WriteCapacityUnits: 2       
+        WriteCapacityUnits: 2    
+
+  CloudformationRole:
+    Type: AWS::IAM::Role # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      AssumeRolePolicyDocument: 
+        Version: "2012-10-17"
+        Statement: 
+      Handler: app.lambdaHandler
+      Runtime: nodejs14.x
+      Architectures:
+        - x86_64
+      Events:
+        HelloWorld:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            Path: /hello
+            Method: get
+      Policies: 
+        - DynamoDBCrudPolicy:   
+            TableName: !Ref UserTable              
 
 Outputs:
   # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function

@@ -60,7 +60,11 @@ Resources:
                 Action:
                   - 'workmailmessageflow:GetRawMessageContent'
                 Resource: !Sub 'arn:aws:workmailmessageflow:${AWS::Region}:${AWS::AccountId}:message/*'
-                
+              - Effect: Allow
+                Action:
+                  - 'ses:SendEmail'
+                  - 'ses:SendRawEmail'
+                Resource: '*' 
       ManagedPolicyArns:
         - "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
         - "arn:aws:iam::aws:policy/AmazonWorkMailMessageFlowFullAccess"

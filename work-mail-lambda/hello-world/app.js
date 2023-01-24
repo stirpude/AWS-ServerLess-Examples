@@ -1,6 +1,8 @@
 
 let response;
 const helper  = require('./helper');
+const emailResponse = require('./generateemailresponse');
+const nodemailer = require('nodemailer');
 
 
 /**
@@ -24,16 +26,21 @@ exports.workMailLambda = async (event, context) => {
             ('The message content is not found');
         }
 
-        //extract email body text
+        //extract email body text and print it
         const result = await helper.parseMimeEmail(rawMessageContentBuffer.messageContent);
         console.log('Email body'+JSON.stringify(result));
         
-        response = {
-            'statusCode': 200,
-            'body': JSON.stringify({
-                emailBody: result.emailBody,
-            })
-        }
+        
+        //email response from chatGpt
+        response = await emailResponse.generateEmailResponseFromChatGPT(rawMessageContentBuffer.messageContent);
+        console.log('Email response from ChatGPT'+JSON.stringify(response));
+
+        const emailResponeWithoutTrail = response.replace(/\n/g,'');
+        
+        //send the email using ses
+        const emailBodyResponse = await helper.sendEmail(emailResponeWithoutTrail);
+        console.log('Mail sent'+JSON.stringify(emailBodyResponse));
+
     } catch (err) {
         console.log(err);
         return err;
